@@ -3,88 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planeta Artysty</title>
-    <!-- Kosmiczna czcionka z Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <title>Planeta Dryf Kulis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
+            /* Wartości domyślne (komputer) */
             --radius: 280px;
             --planet-size: 160px;
-            --space-blue: #a0c8ff; /* Ten sam błękit co z planety */
+            --space-blue: #a0c8ff;
+            --font-main: 'Space Mono', monospace;
+        }
+
+        /* Optymalizacja pod telefony */
+        @media (max-width: 768px) {
+            :root {
+                --radius: 160px;
+                --planet-size: 100px;
+            }
+            .header { font-size: 14px !important; top: 20px !important; }
+            .icon-content img { width: 50px !important; height: 50px !important; }
+            .footer-instruction { font-size: 8px !important; bottom: 20px !important; }
         }
 
         body {
             margin: 0;
             height: 100vh;
+            background-color: #020204;
+            color: white;
+            font-family: var(--font-main);
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #020204;
-            color: white;
-            font-family: 'Space Mono', monospace;
-            overflow: hidden;
-            user-select: none;
         }
 
-        /* --- TELEWIZYJNY SZUM (TV STATIC) NA CAŁEJ STRONIE --- */
-        body::after {
-            content: "";
+        /* --- NAPRAWIONY SZUM TELEWIZYJNY --- */
+        .tv-noise {
             position: fixed;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: url('https://upload.wikimedia.org/wikipedia/commons/5/5a/Static_noise.png');
-            opacity: 0.08; /* Subtelny, ale widoczny na wszystkim */
-            pointer-events: none;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: 9999;
-            animation: tv-static 0.2s steps(4) infinite;
+            pointer-events: none;
+            opacity: 0.12;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            animation: noise-anim 0.2s steps(2) infinite;
         }
 
-        @keyframes tv-static {
+        @keyframes noise-anim {
             0% { transform: translate(0,0); }
-            25% { transform: translate(-1%, -1%); }
-            50% { transform: translate(-2%, 1%); }
-            75% { transform: translate(1%, -2%); }
-            100% { transform: translate(-1%, 2%); }
+            10% { transform: translate(-5%,-5%); }
+            20% { transform: translate(10%,5%); }
+            30% { transform: translate(-5%,10%); }
+            40% { transform: translate(15%,-10%); }
+            50% { transform: translate(-10%,15%); }
+            60% { transform: translate(5%,-5%); }
+            70% { transform: translate(15%,10%); }
+            80% { transform: translate(-15%,5%); }
+            90% { transform: translate(10%,-10%); }
+            100% { transform: translate(0,0); }
         }
 
-        /* --- NAGŁÓWEK --- */
+        /* --- NAGŁÓWEK Z ANIMACJĄ PISANIA --- */
         .header {
             position: absolute;
-            top: 40px;
+            top: 50px;
             text-align: center;
             color: var(--space-blue);
             text-transform: uppercase;
-            letter-spacing: 5px;
-            font-size: 18px;
-            text-shadow: 0 0 10px rgba(160, 200, 255, 0.6);
-            z-index: 1000;
-        }
-
-        .dots span {
-            animation: blink 1.5s infinite;
-            opacity: 0;
-        }
-        .dots span:nth-child(2) { animation-delay: 0.5s; }
-        .dots span:nth-child(3) { animation-delay: 1s; }
-
-        @keyframes blink {
-            50% { opacity: 1; }
-        }
-
-        /* --- INSTRUKCJA NA DOLE --- */
-        .footer-instruction {
-            position: absolute;
-            bottom: 40px;
-            font-size: 10px;
             letter-spacing: 4px;
-            text-transform: uppercase;
-            opacity: 0.4;
-            color: white;
+            font-size: 20px;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 3px solid var(--space-blue); /* Kursor */
+            width: 0;
+            animation: 
+                typing 2s steps(25, end) forwards,
+                blink-caret 0.75s step-end infinite;
+            text-shadow: 0 0 12px rgba(160, 200, 255, 0.7);
             z-index: 1000;
         }
 
-        /* --- PLANETA I SCENA --- */
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 320px; } /* Szerokość dopasowana do tekstu */
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--space-blue); }
+        }
+
+        /* --- SCENA I PLANETA --- */
         .scene {
             perspective: 2000px;
             width: 100vw;
@@ -94,7 +103,6 @@
             align-items: center;
             cursor: grab;
         }
-        .scene:active { cursor: grabbing; }
 
         .stage {
             position: relative;
@@ -102,7 +110,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transform: rotateX(15deg);
+            transform: rotateX(12deg);
         }
 
         .white-planet {
@@ -110,28 +118,25 @@
             width: var(--planet-size);
             height: var(--planet-size);
             border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #d0e4ff 25%, #4076ff 60%, #051025 100%);
-            box-shadow: inset -15px -15px 40px rgba(0, 0, 0, 0.9), inset 10px 10px 25px rgba(255, 255, 255, 0.7), 0 0 60px rgba(100, 180, 255, 0.4);
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #d0e4ff 25%, #3066ff 60%, #050a15 100%);
+            box-shadow: inset -10px -10px 30px rgba(0, 0, 0, 0.9), inset 10px 10px 20px rgba(255, 255, 255, 0.6), 0 0 50px rgba(100, 180, 255, 0.3);
             z-index: 1;
-            transform: rotateX(-15deg);
+            transform: rotateX(-12deg);
         }
-        
+
         .white-planet::after {
             content: "";
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            filter: url(#cracks) opacity(0.35);
+            filter: url(#cracks) opacity(0.3);
             mix-blend-mode: overlay;
             border-radius: 50%;
         }
 
-        /* --- IKONY --- */
+        /* --- IKONY I NAPISY --- */
         .orbit-container {
             position: absolute;
             transform-style: preserve-3d;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
         .icon-slot {
@@ -141,7 +146,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 100px;
+            width: 120px;
         }
 
         .icon-content {
@@ -150,26 +155,28 @@
             align-items: center;
             text-decoration: none;
             color: white;
+            text-align: center;
         }
 
         .icon-content img {
             width: 80px;
             height: 80px;
             object-fit: contain;
-            filter: grayscale(100%) brightness(0.8);
+            filter: grayscale(100%) brightness(0.7);
             transition: 0.4s ease;
         }
 
         .icon-content span {
             margin-top: 15px;
             font-size: 10px;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            width: 200px;
+            width: 180px;
             text-align: center;
+            color: white; /* Napisy są teraz białe */
             opacity: 0;
             transition: 0.3s;
-            color: var(--space-blue);
+            text-shadow: 0 0 8px rgba(0,0,0,1);
         }
 
         .icon-content:hover img {
@@ -178,12 +185,23 @@
         }
         .icon-content:hover span { opacity: 1; }
 
+        /* --- INSTRUKCJA --- */
+        .footer-instruction {
+            position: absolute;
+            bottom: 40px;
+            font-size: 10px;
+            letter-spacing: 4px;
+            opacity: 0.3;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
 
+    <div class="tv-noise"></div>
+
     <div class="header">
-        planeta dryf kulis<span class="dots"><span>.</span><span>.</span><span>.</span></span>
+        planeta dryf kulis...
     </div>
 
     <svg style="position: absolute; width: 0; height: 0;">
@@ -198,41 +216,11 @@
         <div class="stage">
             <div class="white-planet"></div>
             <div class="orbit-container" id="orbit">
-                <!-- Spotify -->
-                <div class="icon-slot">
-                    <a href="#" class="icon-content">
-                        <img src="https://cdn-icons-png.flaticon.com/512/174/174872.png" alt="Spotify">
-                        <span>Spotify</span>
-                    </a>
-                </div>
-                <!-- Apple Music -->
-                <div class="icon-slot">
-                    <a href="#" class="icon-content">
-                        <img src="applemusic.png" alt="Apple Music">
-                        <span>Apple Music</span>
-                    </a>
-                </div>
-                <!-- TikTok -->
-                <div class="icon-slot">
-                    <a href="#" class="icon-content">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok">
-                        <span>TikTok</span>
-                    </a>
-                </div>
-                <!-- Instagram -->
-                <div class="icon-slot">
-                    <a href="#" class="icon-content">
-                        <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram">
-                        <span>Instagram</span>
-                    </a>
-                </div>
-                <!-- Bandcamp -->
-                <div class="icon-slot">
-                    <a href="#" class="icon-content">
-                        <img src="bandcamp.png" alt="Bandcamp">
-                        <span>Bandcamp</span>
-                    </a>
-                </div>
+                <div class="icon-slot"><a href="#" class="icon-content"><img src="https://cdn-icons-png.flaticon.com/512/174/174872.png" alt="Spotify"><span>Spotify</span></a></div>
+                <div class="icon-slot"><a href="#" class="icon-content"><img src="applemusic.png" alt="Apple Music"><span>Apple Music</span></a></div>
+                <div class="icon-slot"><a href="#" class="icon-content"><img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok"><span>TikTok</span></a></div>
+                <div class="icon-slot"><a href="#" class="icon-content"><img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram"><span>Instagram</span></a></div>
+                <div class="icon-slot"><a href="#" class="icon-content"><img src="bandcamp.png" alt="Bandcamp"><span>Bandcamp</span></a></div>
             </div>
         </div>
     </div>
@@ -254,12 +242,15 @@
                 currentRotation += autoSpinSpeed;
             }
 
+            // Pobieranie promienia z CSS (ważne przy zmianie rozmiaru okna/telefonu)
+            const radius = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--radius'));
+
             slots.forEach((slot, i) => {
                 const baseAngle = (i / count) * 360;
                 const finalAngle = baseAngle + currentRotation;
-                const zPos = Math.cos(finalAngle * Math.PI / 180) * 280;
+                const zPos = Math.cos(finalAngle * Math.PI / 180) * radius;
 
-                slot.style.transform = `rotateY(${finalAngle}deg) translateZ(var(--radius))`;
+                slot.style.transform = `rotateY(${finalAngle}deg) translateZ(${radius}px)`;
                 
                 if (zPos < -40) {
                     slot.style.opacity = "0.1";
