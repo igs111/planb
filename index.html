@@ -14,15 +14,16 @@
         }
 
         @media (max-width: 768px) {
-            :root { --radius: 160px; --planet-size: 100px; }
+            :root { --radius: 180px; --planet-size: 110px; }
             .header { font-size: 14px !important; top: 20px !important; }
             .icon-content img { width: 55px !important; height: 55px !important; }
         }
 
         body {
             margin: 0;
+            padding: 0;
             height: 100vh;
-            background: radial-gradient(circle at center, #080b1a 0%, #010103 100%);
+            background: #020205;
             color: white;
             font-family: 'Space Mono', monospace;
             overflow: hidden;
@@ -31,126 +32,122 @@
             align-items: center;
         }
 
-        /* --- SUBTELNY SZUM --- */
+        /* --- SZUM (TV STATIC) --- */
         .tv-noise {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 9999;
+            z-index: 1000;
             pointer-events: none;
-            opacity: 0.03;
-            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            opacity: 0.04;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
         }
 
-        /* --- GENERATOR GWIAZD (Paralaksa) --- */
-        .star-field {
+        /* --- GENEROWANE GWIAZDY --- */
+        #star-container {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
             z-index: -1;
+            background: radial-gradient(circle at center, #0a0e1f 0%, #020205 100%);
         }
-
-        /* Warstwa 1: Drobny pył gwiezdny */
-        .stars-small {
-            width: 1px; height: 1px;
-            background: transparent;
-            box-shadow: 454px 108px #FFF , 1801px 1867px #FFF , 1482px 512px #FFF , 856px 1456px #FFF , 256px 256px #FFF , 1123px 154px #FFF , 1654px 112px #FFF , 543px 876px #FFF , 1200px 300px #FFF , 400px 1500px #FFF , 900px 200px #FFF , 100px 1100px #FFF , 1700px 900px #FFF , 350px 750px #FFF , 1450px 1350px #FFF , 600px 100px #FFF;
-            /* Tu w prawdziwym kodzie byłoby setki cieni, symulujemy je animacją */
-            animation: drift 100s linear infinite;
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
         }
-        .stars-small::after {
-            content: " "; position: absolute; top: 2000px; width: 1px; height: 1px;
-            box-shadow: 454px 108px #FFF , 1801px 1867px #FFF , 1482px 512px #FFF , 856px 1456px #FFF , 256px 256px #FFF , 1123px 154px #FFF;
-        }
-
-        /* Warstwa 2: Średnie migoczące gwiazdy */
-        .stars-medium {
-            width: 2px; height: 2px;
-            background: transparent;
-            box-shadow: 800px 400px #FFF , 200px 900px #FFF , 1400px 600px #FFF , 500px 100px #FFF , 1100px 1200px #FFF , 1600px 200px #FFF , 300px 1500px #FFF , 1000px 800px #FFF;
-            animation: twinkle 4s infinite alternate, drift 150s linear infinite;
-        }
-
-        @keyframes drift {
-            from { transform: translateY(0px); }
-            to { transform: translateY(-2000px); }
-        }
-
-        @keyframes twinkle {
-            0% { opacity: 0.2; }
-            100% { opacity: 0.8; }
-        }
+        .twinkle { animation: twinkle-anim 3s infinite alternate; }
+        @keyframes twinkle-anim { from { opacity: 0.2; } to { opacity: 1; } }
 
         /* --- SPADAJĄCE GWIAZDY --- */
         .shooting-star {
-            position: absolute; top: 0; left: 50%; width: 2px; height: 80px;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+            position: absolute; width: 2px; height: 80px;
+            background: linear-gradient(to bottom, transparent, white);
             opacity: 0; transform: rotate(45deg);
-            animation: shoot 12s infinite ease-in;
-        }
-        .shooting-star:nth-child(2) { animation-delay: 4s; left: 20%; animation-duration: 18s; }
-        .shooting-star:nth-child(3) { animation-delay: 8s; left: 80%; animation-duration: 15s; }
-
-        @keyframes shoot {
-            0% { transform: translate(300px, -300px) rotate(45deg); opacity: 0; }
-            5% { opacity: 1; }
-            10% { transform: translate(-800px, 800px) rotate(45deg); opacity: 0; }
-            100% { transform: translate(-800px, 800px) rotate(45deg); opacity: 0; }
+            z-index: -1;
         }
 
         /* --- NAGŁÓWEK --- */
         .header {
-            position: absolute; top: 50px; color: var(--space-blue);
-            text-transform: uppercase; letter-spacing: 4px; font-size: 20px;
-            white-space: nowrap; overflow: hidden; border-right: 3px solid var(--space-blue);
-            width: 0; animation: typing 2s steps(25, end) forwards, blink-caret 0.75s step-end infinite;
-            text-shadow: 0 0 10px rgba(160, 200, 255, 0.5); z-index: 1000;
+            position: absolute; top: 60px;
+            color: var(--space-blue);
+            text-transform: uppercase;
+            letter-spacing: 5px; font-size: 20px;
+            white-space: nowrap; overflow: hidden;
+            border-right: 3px solid var(--space-blue);
+            width: 0;
+            animation: typing 2.5s steps(25, end) forwards, blink-caret 0.75s step-end infinite;
+            text-shadow: 0 0 15px rgba(160, 200, 255, 0.5);
         }
         @keyframes typing { from { width: 0 } to { width: 310px; } }
         @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--space-blue); } }
 
-        /* --- SCENA I PLANETA --- */
+        /* --- SCENA 3D (WYŚRODKOWANIE) --- */
         .scene {
-            perspective: 2000px; width: 100vw; height: 100vh;
-            display: flex; justify-content: center; align-items: center; cursor: grab;
+            position: relative;
+            width: 100vw; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            perspective: 2000px;
+            cursor: grab;
         }
-        .scene:active { cursor: grabbing; }
 
-        .stage { position: relative; transform-style: preserve-3d; transform: rotateX(12deg); }
+        /* Stage to martwy punkt */
+        .stage {
+            position: absolute;
+            transform-style: preserve-3d;
+            transform: rotateX(15deg);
+            display: flex; justify-content: center; align-items: center;
+        }
 
+        /* --- PLANETA --- */
         .white-planet {
-            position: absolute; width: var(--planet-size); height: var(--planet-size);
+            position: absolute;
+            width: var(--planet-size); height: var(--planet-size);
             border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #d0e4ff 25%, #2055ff 65%, #050a15 100%);
-            box-shadow: inset -10px -10px 30px rgba(0, 0, 0, 0.9), inset 10px 10px 20px rgba(255, 255, 255, 0.6), 0 0 60px rgba(80, 150, 255, 0.3);
-            z-index: 1; transform: rotateX(-12deg);
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #d0e4ff 25%, #2563ff 65%, #050a15 100%);
+            box-shadow: 
+                inset -15px -15px 40px rgba(0, 0, 0, 0.9), 
+                inset 10px 10px 25px rgba(255, 255, 255, 0.7), 
+                0 0 60px rgba(80, 150, 255, 0.3);
+            z-index: 1;
+            transform: rotateX(-15deg); /* Prostujemy wizualnie kulę */
         }
         .white-planet::after {
             content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            filter: url(#cracks) opacity(0.3); mix-blend-mode: overlay; border-radius: 50%;
+            filter: url(#cracks) opacity(0.35); mix-blend-mode: overlay; border-radius: 50%;
         }
 
         /* --- IKONY --- */
-        .orbit-container { position: absolute; transform-style: preserve-3d; }
-        .icon-slot {
-            position: absolute; transform-style: preserve-3d;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; width: 120px;
+        .orbit-container {
+            position: absolute;
+            transform-style: preserve-3d;
+            display: flex; justify-content: center; align-items: center;
         }
+
+        .icon-slot {
+            position: absolute;
+            transform-style: preserve-3d;
+            display: flex; flex-direction: column; align-items: center; width: 120px;
+        }
+
         .icon-content {
             display: flex; flex-direction: column; align-items: center;
-            text-decoration: none; color: white; text-align: center;
+            text-decoration: none; color: white;
         }
+
         .icon-content img {
             width: 80px; height: 80px; object-fit: contain;
-            filter: grayscale(100%) brightness(0.75);
+            filter: grayscale(100%) brightness(0.8);
             transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
         }
+
         .icon-content span {
             margin-top: 15px; font-size: 10px; letter-spacing: 2px;
             text-transform: uppercase; width: 180px; text-align: center;
             color: white; opacity: 0; transition: 0.3s;
             text-shadow: 0 0 10px rgba(0,0,0,1);
         }
-        .icon-content:hover img { filter: grayscale(0%) brightness(1.2); transform: scale(1.1); }
+
+        .icon-content:hover img { filter: grayscale(0%) brightness(1.2); transform: scale(1.15); }
         .icon-content:hover span { opacity: 1; }
 
         .footer-instruction {
@@ -162,16 +159,7 @@
 <body>
 
     <div class="tv-noise"></div>
-    
-    <!-- WIĘCEJ GWIAZD -->
-    <div class="star-field">
-        <div class="stars-small"></div>
-        <div class="stars-medium"></div>
-    </div>
-    
-    <div class="shooting-star"></div>
-    <div class="shooting-star"></div>
-    <div class="shooting-star"></div>
+    <div id="star-container"></div>
 
     <div class="header">planeta dryf kulis...</div>
 
@@ -187,6 +175,7 @@
         <div class="stage">
             <div class="white-planet"></div>
             <div class="orbit-container" id="orbit">
+                <!-- Ikony -->
                 <div class="icon-slot"><a href="#" class="icon-content"><img src="https://cdn-icons-png.flaticon.com/512/174/174872.png" alt="Spotify"><span>Spotify</span></a></div>
                 <div class="icon-slot"><a href="#" class="icon-content"><img src="applemusic.png" alt="Apple Music"><span>Apple Music</span></a></div>
                 <div class="icon-slot"><a href="#" class="icon-content"><img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok"><span>TikTok</span></a></div>
@@ -199,6 +188,44 @@
     <div class="footer-instruction">PRZESUŃ, ABY OBRÓCIĆ</div>
 
     <script>
+        // --- GENERATOR GWIAZD ---
+        const starContainer = document.getElementById('star-container');
+        function createStars() {
+            for (let i = 0; i < 400; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                if (Math.random() > 0.7) star.className += ' twinkle';
+                
+                const size = Math.random() * 2;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.opacity = Math.random();
+                starContainer.appendChild(star);
+            }
+        }
+        createStars();
+
+        // --- SPADAJĄCE GWIAZDY ---
+        function createShootingStar() {
+            const star = document.createElement('div');
+            star.className = 'shooting-star';
+            star.style.left = Math.random() * 100 + 'vw';
+            star.style.top = Math.random() * 50 + 'vh';
+            document.body.appendChild(star);
+            
+            star.animate([
+                { transform: 'translate(0, 0) rotate(45deg)', opacity: 0 },
+                { opacity: 1, offset: 0.1 },
+                { transform: 'translate(-600px, 600px) rotate(45deg)', opacity: 0 }
+            ], { duration: 1500, easing: 'ease-in' });
+            
+            setTimeout(() => star.remove(), 1500);
+        }
+        setInterval(() => { if (Math.random() > 0.7) createShootingStar(); }, 3000);
+
+        // --- LOGIKA PLANETY ---
         const scene = document.getElementById('scene');
         const slots = document.querySelectorAll('.icon-slot');
         const count = slots.length;
@@ -210,21 +237,30 @@
 
         function update() {
             if (!isDragging) { currentRotation += autoSpinSpeed; }
+
             const radius = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--radius'));
+
             slots.forEach((slot, i) => {
                 const baseAngle = (i / count) * 360;
                 const finalAngle = baseAngle + currentRotation;
                 const zPos = Math.cos(finalAngle * Math.PI / 180) * radius;
+
                 slot.style.transform = `rotateY(${finalAngle}deg) translateZ(${radius}px)`;
-                if (zPos < -40) {
-                    slot.style.opacity = "0.08"; slot.style.pointerEvents = "none";
+                
+                // Ukrywanie ikon z tyłu
+                if (zPos < -50) {
+                    slot.style.opacity = "0.08";
+                    slot.style.pointerEvents = "none";
                 } else {
-                    slot.style.opacity = "1"; slot.style.pointerEvents = "auto"; slot.style.zIndex = 10;
+                    slot.style.opacity = "1";
+                    slot.style.pointerEvents = "auto";
+                    slot.style.zIndex = Math.round(zPos + 500);
                 }
             });
             requestAnimationFrame(update);
         }
 
+        // Obsługa myszy/dotyku
         function handleStart(e) { isDragging = true; startX = e.pageX || (e.touches ? e.touches[0].pageX : 0); }
         function handleEnd() { isDragging = false; }
         function handleMove(e) {
