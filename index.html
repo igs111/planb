@@ -3,15 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strona Artysty - Realistyczna Planeta</title>
+    <title>Planeta Artysty - Final</title>
     <style>
         :root {
-            --radius: 280px;
+            --radius: 280px; /* Odległość ikon od środka */
             --planet-size: 160px;
-            /* Kolory światła */
-            --glow-main: rgba(100, 180, 255, 0.4);
-            --highlight: #ffffff;
-            --shadow-color: #000a1a;
+            --glow-color: rgba(100, 180, 255, 0.4);
         }
 
         body {
@@ -20,23 +17,22 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #020205; /* Głębsza czerń */
+            background-color: #030305;
             color: white;
             font-family: 'Inter', sans-serif;
             overflow: hidden;
             user-select: none;
         }
 
-        /* SZUM DLA REALIZMU */
+        /* SZUM (GRAIN) */
         body::before {
             content: "";
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: url('https://grainy-gradients.vercel.app/noise.svg');
-            opacity: 0.15;
+            opacity: 0.12;
             pointer-events: none;
-            z-index: 100;
+            z-index: 1000;
         }
 
         .scene {
@@ -48,67 +44,60 @@
             align-items: center;
             cursor: grab;
         }
+        .scene:active { cursor: grabbing; }
 
+        /* GŁÓWNY KONTENER 3D */
         .stage {
             position: relative;
-            width: 0; height: 0;
+            transform-style: preserve-3d;
             display: flex;
             justify-content: center;
             align-items: center;
-            transform-style: preserve-3d;
             transform: rotateX(15deg);
         }
 
-        /* REALISTYCZNA KULA (RENDER LOOK) */
+        /* REALISTYCZNA KULA (RENDER) */
         .white-planet {
             position: absolute;
             width: var(--planet-size);
             height: var(--planet-size);
             border-radius: 50%;
-            
-            /* 1. Podstawowy kolor i cieniowanie sferyczne */
-            background: radial-gradient(circle at 30% 30%, 
+            background: radial-gradient(circle at 35% 35%, 
                 #ffffff 0%, 
-                #e6f0ff 20%, 
-                #8fb9ff 50%, 
-                #0a1a33 100%
+                #d0e4ff 25%, 
+                #6096ff 60%, 
+                #051025 100%
             );
-
-            /* 2. Cienie wewnętrzne nadające objętość (3D volume) */
             box-shadow: 
-                inset -15px -15px 40px rgba(0, 0, 0, 0.8), /* Głęboki cień z tyłu */
-                inset 10px 10px 20px rgba(255, 255, 255, 0.8), /* Silne światło z przodu */
-                0 0 50px var(--glow-main), /* Zewnętrzna poświata (atmosfera) */
-                0 0 100px rgba(100, 150, 255, 0.1);
-
+                inset -15px -15px 40px rgba(0, 0, 0, 0.9),
+                inset 10px 10px 25px rgba(255, 255, 255, 0.7),
+                0 0 60px var(--glow-color);
             z-index: 1;
-            overflow: hidden;
-            transform: rotateX(-15deg); /* Kontra dla pochylenia sceny */
+            transform: rotateX(-15deg); /* Prostujemy wizualnie kulę */
         }
 
-        /* Warstwa z pęknięciami (nałożona na kulę) */
+        /* Odblask światła na kuli */
+        .white-planet::before {
+            content: "";
+            position: absolute;
+            top: 15%; left: 15%;
+            width: 35%; height: 25%;
+            background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, transparent 80%);
+            border-radius: 50%;
+            filter: blur(4px);
+        }
+
+        /* Pęknięcia na kuli */
         .white-planet::after {
             content: "";
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            filter: url(#cracks) opacity(0.4);
-            mix-blend-mode: overlay; /* Klucz do realizmu tekstury */
-            pointer-events: none;
-        }
-
-        /* Odblask na powierzchni (Specular Highlight) */
-        .specular {
-            position: absolute;
-            top: 15%; left: 15%;
-            width: 40%; height: 30%;
-            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+            filter: url(#cracks) opacity(0.3);
+            mix-blend-mode: overlay;
             border-radius: 50%;
-            filter: blur(5px);
-            z-index: 2;
-            pointer-events: none;
         }
 
-        /* ORBITA I IKONY */
+        /* ORBITA */
         .orbit-container {
             position: absolute;
             transform-style: preserve-3d;
@@ -120,12 +109,12 @@
         .icon-slot {
             position: absolute;
             transform-style: preserve-3d;
-            width: 100px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.4s;
+            width: 100px;
+            /* translateZ będzie aplikowany przez JS */
         }
 
         .icon-content {
@@ -134,32 +123,34 @@
             align-items: center;
             text-decoration: none;
             color: white;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
         }
 
         .icon-content img {
             width: 80px;
             height: 80px;
             object-fit: contain;
-            filter: grayscale(100%) brightness(0.7) drop-shadow(0 5px 15px rgba(0,0,0,0.5));
-            transition: 0.5s;
+            filter: grayscale(100%) brightness(0.8) drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+            transition: 0.4s ease;
         }
 
         .icon-content span {
-            margin-top: 15px;
+            margin-top: 12px;
             font-size: 10px;
             letter-spacing: 3px;
             text-transform: uppercase;
+            width: 200px; /* Zapobiega łamaniu tekstu */
+            display: block;
             text-align: center;
-            width: 180px;
             opacity: 0;
             transition: 0.3s;
-            text-shadow: 0 0 10px rgba(0,0,0,1);
+            text-shadow: 0 5px 10px rgba(0,0,0,0.8);
         }
 
-        /* Efekt najechania na ikonę */
+        /* HOVER */
         .icon-content:hover img {
-            filter: grayscale(0%) brightness(1.2) scale(1.1);
+            filter: grayscale(0%) brightness(1.2);
+            transform: scale(1.15);
         }
         .icon-content:hover span {
             opacity: 1;
@@ -169,13 +160,11 @@
 </head>
 <body>
 
+    <!-- Filtry SVG -->
     <svg style="position: absolute; width: 0; height: 0;">
         <filter id="cracks">
-            <feTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="4" result="noise" />
+            <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" result="noise" />
             <feColorMatrix in="noise" type="saturate" values="0" />
-            <feComponentTransfer>
-                <feFuncR type="discrete" tableValues="0 1" />
-            </feComponentTransfer>
             <feComposite operator="in" in2="SourceGraphic" />
         </filter>
     </svg>
@@ -183,36 +172,42 @@
     <div class="scene" id="scene">
         <div class="stage">
             
-            <!-- PLANETA Z WARSTWAMI OŚWIETLENIA -->
-            <div class="white-planet">
-                <div class="specular"></div>
-            </div>
+            <div class="white-planet"></div>
             
             <div class="orbit-container" id="orbit">
+                <!-- Spotify -->
                 <div class="icon-slot">
                     <a href="#" class="icon-content">
                         <img src="https://cdn-icons-png.flaticon.com/512/174/174872.png" alt="Spotify">
                         <span>Spotify</span>
                     </a>
                 </div>
+
+                <!-- Apple Music -->
                 <div class="icon-slot">
                     <a href="#" class="icon-content">
                         <img src="applemusic.png" alt="Apple Music">
                         <span>Apple Music</span>
                     </a>
                 </div>
+
+                <!-- TikTok -->
                 <div class="icon-slot">
                     <a href="#" class="icon-content">
                         <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok">
                         <span>TikTok</span>
                     </a>
                 </div>
+
+                <!-- Instagram -->
                 <div class="icon-slot">
                     <a href="#" class="icon-content">
                         <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram">
                         <span>Instagram</span>
                     </a>
                 </div>
+
+                <!-- Bandcamp -->
                 <div class="icon-slot">
                     <a href="#" class="icon-content">
                         <img src="bandcamp.png" alt="Bandcamp">
@@ -243,15 +238,16 @@
                 const baseAngle = (i / count) * 360;
                 const finalAngle = baseAngle + currentRotation;
                 
-                // Obliczanie głębi (z-axis)
+                // Obliczamy Z, by ukrywać ikony z tyłu
                 const zPos = Math.cos(finalAngle * Math.PI / 180) * 280;
 
-                // Rotacja slotu
+                // Kluczowa poprawka: transformacja slotu
+                // rotateY ustawia kąt na orbicie, a translateZ wypycha ikonę od środka
                 slot.style.transform = `rotateY(${finalAngle}deg) translateZ(var(--radius))`;
                 
-                // Logika widoczności i interakcji ikon z tyłu
-                if (zPos < -50) {
-                    slot.style.opacity = "0.15";
+                // Ustawienia klikalności i widoczności tyłu
+                if (zPos < -40) {
+                    slot.style.opacity = "0.2";
                     slot.style.pointerEvents = "none";
                 } else {
                     slot.style.opacity = "1";
@@ -263,11 +259,30 @@
             requestAnimationFrame(update);
         }
 
-        // Mouse Events
+        // Obsługa myszy/dotyku
         function handleStart(e) {
             isDragging = true;
             startX = e.pageX || e.touches[0].pageX;
         }
+
         function handleEnd() { isDragging = false; }
+
         function handleMove(e) {
-            if (!isDragg
+            if (!isDragging) return;
+            const x = e.pageX || e.touches[0].pageX;
+            const delta = (x - startX) * 0.25;
+            currentRotation += delta;
+            startX = x;
+        }
+
+        scene.addEventListener('mousedown', handleStart);
+        window.addEventListener('mouseup', handleEnd);
+        window.addEventListener('mousemove', handleMove);
+        scene.addEventListener('touchstart', handleStart);
+        window.addEventListener('touchend', handleEnd);
+        window.addEventListener('touchmove', handleMove);
+
+        update();
+    </script>
+</body>
+</html>
