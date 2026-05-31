@@ -3,22 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Artysty</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Planeta Artysty</title>
+    <style>
+        :root {
+            --radius: 250px; /* Jak daleko ikony są od środka */
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #050505;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            user-select: none; /* Zapobiega zaznaczaniu tekstu przy kręceniu */
+        }
+
+        /* Kontener 3D */
+        .scene {
+            perspective: 1200px;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: grab;
+        }
+
+        .scene:active {
+            cursor: grabbing;
+        }
+
+        /* Planeta (orbita) */
+        .planet {
+            position: relative;
+            width: 0;
+            height: 0;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out; /* Płynność ruchu przy kręceniu */
+        }
+
+        /* Środek planety - delikatna poświata */
+        .core {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #ffffff33 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        /* Styl ikony */
+        .icon {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            margin-left: -40px;
+            margin-top: -40px;
+            transform-style: preserve-3d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            transition: filter 0.3s, transform 0.3s;
+        }
+
+        .icon img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            filter: grayscale(100%) opacity(0.7);
+            transition: 0.4s;
+        }
+
+        .icon span {
+            margin-top: 10px;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        /* Rozmieszczenie 5 ikon co 72 stopnie (360/5) */
+        .icon:nth-child(1) { transform: rotateY(0deg) translateZ(var(--radius)); }
+        .icon:nth-child(2) { transform: rotateY(72deg) translateZ(var(--radius)); }
+        .icon:nth-child(3) { transform: rotateY(144deg) translateZ(var(--radius)); }
+        .icon:nth-child(4) { transform: rotateY(216deg) translateZ(var(--radius)); }
+        .icon:nth-child(5) { transform: rotateY(288deg) translateZ(var(--radius)); }
+
+        /* Hover efekty */
+        .icon:hover img {
+            filter: grayscale(0%) opacity(1);
+            transform: scale(1.2);
+        }
+
+        .icon:hover span {
+            opacity: 1;
+        }
+
+        .instruction {
+            position: absolute;
+            bottom: 30px;
+            font-size: 12px;
+            opacity: 0.4;
+            letter-spacing: 3px;
+        }
+    </style>
 </head>
 <body>
 
-    <div class="universe">
-        <!-- Główna planeta -->
-        <div class="planet" id="main-planet">
-            <!-- Tutaj dodajemy ikony social mediów -->
-            <div class="icon" style="--i:1;"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram"></div>
-            <div class="icon" style="--i:2;"><img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter"></div>
-            <div class="icon" style="--i:3;"><img src="https://cdn-icons-png.flaticon.com/512/3536/3536445.png" alt="TikTok"></div>
-            <div class="icon" style="--i:4;"><img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube"></div>
-            <div class="icon" style="--i:5;"><img src="https://cdn-icons-png.flaticon.com/512/145/145808.png" alt="Pinterest"></div>
+    <div class="scene" id="scene">
+        <div class="core"></div>
+        <div class="planet" id="planet">
+            
+            <!-- Spotify -->
+            <a href="#" class="icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/174/174872.png" alt="Spotify">
+                <span>Spotify</span>
+            </a>
+
+            <!-- Apple Music -->
+            <a href="#" class="icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/3844/3844727.png" alt="Apple Music">
+                <span>Apple Music</span>
+            </a>
+
+            <!-- TikTok -->
+            <a href="#" class="icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok">
+                <span>TikTok</span>
+            </a>
+
+            <!-- Instagram -->
+            <a href="#" class="icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram">
+                <span>Instagram</span>
+            </a>
+
+            <!-- Bandcamp -->
+            <a href="#" class="icon">
+                <img src="https://cdn-icons-png.flaticon.com/512/2504/2504743.png" alt="Bandcamp">
+                <span>Bandcamp</span>
+            </a>
+
         </div>
     </div>
 
+    <div class="instruction">PRZECIĄGNIJ, ABY OBRÓCIĆ</div>
+
+    <script>
+        const planet = document.getElementById('planet');
+        const scene = document.getElementById('scene');
+        
+        let isDragging = false;
+        let startX;
+        let currentRotation = 0;
+        let autoSpin = 0.2; // Prędkość automatycznego obracania
+
+        // Funkcja obracania
+        function updateRotation() {
+            if (!isDragging) {
+                currentRotation += autoSpin;
+            }
+            planet.style.transform = `rotateY(${currentRotation}deg)`;
+            
+            // Sprawiamy, by ikony zawsze patrzyły na widza
+            const icons = document.querySelectorAll('.icon');
+            icons.forEach(icon => {
+                icon.style.transform = icon.style.transform.split('rotateY')[0] + `rotateY(${-currentRotation}deg) translateZ(var(--radius))`;
+            });
+
+            requestAnimationFrame(updateRotation);
+        }
+
+        // Obsługa myszki
+        scene.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.pageX;
+            autoSpin = 0; // Zatrzymaj auto-spin przy dotknięciu
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+            autoSpin = 0.1; // Powolny powrót do auto-spinu
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const x = e.pageX;
+            const walk = (x - startX) * 0.2; // Czułość obracania
+            currentRotation += walk;
+            startX = x;
+        });
+
+        // Obsługa dotyku (telefony)
+        scene.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            startX = e.touches[0].pageX;
+        });
+
+        window.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const x = e.touches[0].pageX;
+            const walk = (x - startX) * 0.2;
+            currentRotation += walk;
+            startX = x;
+        });
+
+        // Uruchom animację
+        updateRotation();
+    </script>
 </body>
 </html>
