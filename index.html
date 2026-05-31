@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planeta Artysty - Final</title>
+    <title>Planeta Artysty</title>
+    <!-- Kosmiczna czcionka z Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --radius: 280px; /* Odległość ikon od środka */
+            --radius: 280px;
             --planet-size: 160px;
-            --glow-color: rgba(100, 180, 255, 0.4);
+            --space-blue: #a0c8ff; /* Ten sam błękit co z planety */
         }
 
         body {
@@ -17,24 +20,71 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #030305;
+            background-color: #020204;
             color: white;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Space Mono', monospace;
             overflow: hidden;
             user-select: none;
         }
 
-        /* SZUM (GRAIN) */
-        body::before {
+        /* --- TELEWIZYJNY SZUM (TV STATIC) NA CAŁEJ STRONIE --- */
+        body::after {
             content: "";
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://grainy-gradients.vercel.app/noise.svg');
-            opacity: 0.12;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: url('https://upload.wikimedia.org/wikipedia/commons/5/5a/Static_noise.png');
+            opacity: 0.08; /* Subtelny, ale widoczny na wszystkim */
             pointer-events: none;
+            z-index: 9999;
+            animation: tv-static 0.2s steps(4) infinite;
+        }
+
+        @keyframes tv-static {
+            0% { transform: translate(0,0); }
+            25% { transform: translate(-1%, -1%); }
+            50% { transform: translate(-2%, 1%); }
+            75% { transform: translate(1%, -2%); }
+            100% { transform: translate(-1%, 2%); }
+        }
+
+        /* --- NAGŁÓWEK --- */
+        .header {
+            position: absolute;
+            top: 40px;
+            text-align: center;
+            color: var(--space-blue);
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            font-size: 18px;
+            text-shadow: 0 0 10px rgba(160, 200, 255, 0.6);
             z-index: 1000;
         }
 
+        .dots span {
+            animation: blink 1.5s infinite;
+            opacity: 0;
+        }
+        .dots span:nth-child(2) { animation-delay: 0.5s; }
+        .dots span:nth-child(3) { animation-delay: 1s; }
+
+        @keyframes blink {
+            50% { opacity: 1; }
+        }
+
+        /* --- INSTRUKCJA NA DOLE --- */
+        .footer-instruction {
+            position: absolute;
+            bottom: 40px;
+            font-size: 10px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            opacity: 0.4;
+            color: white;
+            z-index: 1000;
+        }
+
+        /* --- PLANETA I SCENA --- */
         .scene {
             perspective: 2000px;
             width: 100vw;
@@ -46,7 +96,6 @@
         }
         .scene:active { cursor: grabbing; }
 
-        /* GŁÓWNY KONTENER 3D */
         .stage {
             position: relative;
             transform-style: preserve-3d;
@@ -56,48 +105,27 @@
             transform: rotateX(15deg);
         }
 
-        /* REALISTYCZNA KULA (RENDER) */
         .white-planet {
             position: absolute;
             width: var(--planet-size);
             height: var(--planet-size);
             border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, 
-                #ffffff 0%, 
-                #d0e4ff 25%, 
-                #6096ff 60%, 
-                #051025 100%
-            );
-            box-shadow: 
-                inset -15px -15px 40px rgba(0, 0, 0, 0.9),
-                inset 10px 10px 25px rgba(255, 255, 255, 0.7),
-                0 0 60px var(--glow-color);
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #d0e4ff 25%, #4076ff 60%, #051025 100%);
+            box-shadow: inset -15px -15px 40px rgba(0, 0, 0, 0.9), inset 10px 10px 25px rgba(255, 255, 255, 0.7), 0 0 60px rgba(100, 180, 255, 0.4);
             z-index: 1;
-            transform: rotateX(-15deg); /* Prostujemy wizualnie kulę */
+            transform: rotateX(-15deg);
         }
-
-        /* Odblask światła na kuli */
-        .white-planet::before {
-            content: "";
-            position: absolute;
-            top: 15%; left: 15%;
-            width: 35%; height: 25%;
-            background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, transparent 80%);
-            border-radius: 50%;
-            filter: blur(4px);
-        }
-
-        /* Pęknięcia na kuli */
+        
         .white-planet::after {
             content: "";
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            filter: url(#cracks) opacity(0.3);
+            filter: url(#cracks) opacity(0.35);
             mix-blend-mode: overlay;
             border-radius: 50%;
         }
 
-        /* ORBITA */
+        /* --- IKONY --- */
         .orbit-container {
             position: absolute;
             transform-style: preserve-3d;
@@ -114,7 +142,6 @@
             align-items: center;
             justify-content: center;
             width: 100px;
-            /* translateZ będzie aplikowany przez JS */
         }
 
         .icon-content {
@@ -123,44 +150,42 @@
             align-items: center;
             text-decoration: none;
             color: white;
-            text-align: center;
         }
 
         .icon-content img {
             width: 80px;
             height: 80px;
             object-fit: contain;
-            filter: grayscale(100%) brightness(0.8) drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+            filter: grayscale(100%) brightness(0.8);
             transition: 0.4s ease;
         }
 
         .icon-content span {
-            margin-top: 12px;
+            margin-top: 15px;
             font-size: 10px;
             letter-spacing: 3px;
             text-transform: uppercase;
-            width: 200px; /* Zapobiega łamaniu tekstu */
-            display: block;
+            width: 200px;
             text-align: center;
             opacity: 0;
             transition: 0.3s;
-            text-shadow: 0 5px 10px rgba(0,0,0,0.8);
+            color: var(--space-blue);
         }
 
-        /* HOVER */
         .icon-content:hover img {
             filter: grayscale(0%) brightness(1.2);
-            transform: scale(1.15);
+            transform: scale(1.1);
         }
-        .icon-content:hover span {
-            opacity: 1;
-        }
+        .icon-content:hover span { opacity: 1; }
 
     </style>
 </head>
 <body>
 
-    <!-- Filtry SVG -->
+    <div class="header">
+        planeta dryf kulis<span class="dots"><span>.</span><span>.</span><span>.</span></span>
+    </div>
+
     <svg style="position: absolute; width: 0; height: 0;">
         <filter id="cracks">
             <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" result="noise" />
@@ -171,9 +196,7 @@
 
     <div class="scene" id="scene">
         <div class="stage">
-            
             <div class="white-planet"></div>
-            
             <div class="orbit-container" id="orbit">
                 <!-- Spotify -->
                 <div class="icon-slot">
@@ -182,7 +205,6 @@
                         <span>Spotify</span>
                     </a>
                 </div>
-
                 <!-- Apple Music -->
                 <div class="icon-slot">
                     <a href="#" class="icon-content">
@@ -190,7 +212,6 @@
                         <span>Apple Music</span>
                     </a>
                 </div>
-
                 <!-- TikTok -->
                 <div class="icon-slot">
                     <a href="#" class="icon-content">
@@ -198,7 +219,6 @@
                         <span>TikTok</span>
                     </a>
                 </div>
-
                 <!-- Instagram -->
                 <div class="icon-slot">
                     <a href="#" class="icon-content">
@@ -206,7 +226,6 @@
                         <span>Instagram</span>
                     </a>
                 </div>
-
                 <!-- Bandcamp -->
                 <div class="icon-slot">
                     <a href="#" class="icon-content">
@@ -215,9 +234,10 @@
                     </a>
                 </div>
             </div>
-
         </div>
     </div>
+
+    <div class="footer-instruction">PRZESUŃ, ABY OBRÓCIĆ</div>
 
     <script>
         const scene = document.getElementById('scene');
@@ -237,17 +257,12 @@
             slots.forEach((slot, i) => {
                 const baseAngle = (i / count) * 360;
                 const finalAngle = baseAngle + currentRotation;
-                
-                // Obliczamy Z, by ukrywać ikony z tyłu
                 const zPos = Math.cos(finalAngle * Math.PI / 180) * 280;
 
-                // Kluczowa poprawka: transformacja slotu
-                // rotateY ustawia kąt na orbicie, a translateZ wypycha ikonę od środka
                 slot.style.transform = `rotateY(${finalAngle}deg) translateZ(var(--radius))`;
                 
-                // Ustawienia klikalności i widoczności tyłu
                 if (zPos < -40) {
-                    slot.style.opacity = "0.2";
+                    slot.style.opacity = "0.1";
                     slot.style.pointerEvents = "none";
                 } else {
                     slot.style.opacity = "1";
@@ -259,14 +274,8 @@
             requestAnimationFrame(update);
         }
 
-        // Obsługa myszy/dotyku
-        function handleStart(e) {
-            isDragging = true;
-            startX = e.pageX || e.touches[0].pageX;
-        }
-
+        function handleStart(e) { isDragging = true; startX = e.pageX || e.touches[0].pageX; }
         function handleEnd() { isDragging = false; }
-
         function handleMove(e) {
             if (!isDragging) return;
             const x = e.pageX || e.touches[0].pageX;
