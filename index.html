@@ -7,7 +7,8 @@
     <style>
         :root {
             --radius: 280px;
-            --planet-size: 140px;
+            --planet-size: 150px;
+            --glow-color: rgba(100, 180, 255, 0.6);
         }
 
         body {
@@ -16,23 +17,23 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #0a0a0a;
+            background-color: #050505;
             color: white;
             font-family: 'Inter', sans-serif;
             overflow: hidden;
             user-select: none;
         }
 
-        /* EFEKT SZUMU (GRAIN) NA CAŁEJ STRONIE */
+        /* SZUM / GRAIN */
         body::before {
             content: "";
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
             background: url('https://grainy-gradients.vercel.app/noise.svg');
-            opacity: 0.07;
+            opacity: 0.1;
             pointer-events: none;
-            z-index: 1000;
+            z-index: 100;
         }
 
         .scene {
@@ -43,193 +44,198 @@
             justify-content: center;
             align-items: center;
             cursor: grab;
-            transform: rotateX(20deg); /* Skos */
         }
-
         .scene:active { cursor: grabbing; }
 
-        /* PLANETA Z TEKSTURĄ I PĘKNIĘCIAMI */
+        /* KONTENER PLANETY I ORBITY (WYŚRODKOWANY) */
+        .stage {
+            position: relative;
+            width: 0;
+            height: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: rotateX(20deg); /* Pochylenie całej sceny */
+            transform-style: preserve-3d;
+        }
+
+        /* PLANETA - ŚWIECĄCA KULA */
         .white-planet {
             position: absolute;
             width: var(--planet-size);
             height: var(--planet-size);
-            background: #f0f0f0;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #b0d4ff);
             border-radius: 50%;
             z-index: 1;
-            transform: rotateX(-20deg);
-            
-            /* Tekstura pęknięć przez SVG filter */
-            filter: url(#cracks) drop-shadow(0 0 30px rgba(100, 150, 255, 0.2));
+            /* Efekt świecenia */
             box-shadow: 
-                inset -20px -20px 50px rgba(0,0,0,0.2),
-                inset 10px 10px 30px rgba(135, 206, 250, 0.3); /* Niebieska poświata pęknięć */
+                0 0 40px var(--glow-color),
+                0 0 100px rgba(255, 255, 255, 0.2),
+                inset -10px -10px 30px rgba(0,0,0,0.3);
+            filter: url(#cracks); /* Pęknięcia */
+            transform: rotateX(-20deg); /* Prostujemy ją wizualnie */
         }
 
-        .planet-shadow {
-            position: absolute;
-            width: 180px;
-            height: 40px;
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 50%;
-            filter: blur(15px);
-            transform: translateY(100px) rotateX(90deg);
-            z-index: 0;
-        }
-
+        /* ORBITA */
         .orbit-container {
-            position: relative;
-            width: 0;
-            height: 0;
+            position: absolute;
             transform-style: preserve-3d;
+            width: 0; height: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .icon-slot {
             position: absolute;
             transform-style: preserve-3d;
-            transition: opacity 0.3s;
+            width: 120px; /* Stała szerokość slotu dla centrowania */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .icon-content {
-            width: 100px;
-            height: 100px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-decoration: none;
             color: white;
-            /* Usunęliśmy stąd kontr-rotację w JS, więc ikona kręci się "sztywno" */
+            width: 100%;
         }
 
         .icon-content img {
-            width: 75px;
-            height: 75px;
-            filter: grayscale(100%) contrast(1.2) brightness(0.9);
-            transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-            opacity: 0.8;
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            filter: grayscale(100%) brightness(0.8);
+            transition: 0.4s ease;
         }
 
         .icon-content span {
-            margin-top: 10px;
+            margin-top: 12px;
             font-size: 10px;
             letter-spacing: 3px;
             text-transform: uppercase;
+            text-align: center;
+            width: 200px; /* Szeroki kontener na tekst by się nie łamał */
             opacity: 0;
             transition: 0.3s;
         }
 
-        /* Hover: Ikona "ożywa" */
+        /* HOVER */
         .icon-content:hover img {
-            filter: grayscale(0%) contrast(1) brightness(1.1);
-            transform: scale(1.2);
+            filter: grayscale(0%) brightness(1.2);
+            transform: scale(1.1);
+        }
+        .icon-content:hover span {
             opacity: 1;
         }
-
-        .icon-content:hover span { opacity: 1; }
 
     </style>
 </head>
 <body>
 
-    <!-- Filtry SVG dla pęknięć i szumu -->
+    <!-- Filtry SVG dla pęknięć -->
     <svg style="position: absolute; width: 0; height: 0;">
         <filter id="cracks">
-            <!-- Generuje "organiczne" niedoskonałości -->
-            <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" result="noise" />
-            <feDiffuseLighting in="noise" lighting-color="#e0f0ff" surfaceScale="2">
-                <feDistantLight azimuth="45" elevation="60" />
+            <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" result="noise" />
+            <feDiffuseLighting in="noise" lighting-color="#a0c8ff" surfaceScale="3">
+                <feDistantLight azimuth="45" elevation="50" />
             </feDiffuseLighting>
             <feComposite operator="in" in2="SourceGraphic" />
         </filter>
     </svg>
 
     <div class="scene" id="scene">
-        <div class="planet-shadow"></div>
-        <div class="white-planet"></div>
-        
-        <div class="orbit-container" id="orbit">
-            <!-- Spotify -->
-            <div class="icon-slot">
-                <a href="#" class="icon-content">
-                    <img src="https://cdn-icons-png.flaticon.com/512/174/174872.png" alt="Spotify">
-                    <span>Spotify</span>
-                </a>
-            </div>
+        <div class="stage">
+            <div class="white-planet"></div>
+            
+            <div class="orbit-container" id="orbit">
+                <!-- Spotify -->
+                <div class="icon-slot">
+                    <a href="#" class="icon-content">
+                        <img src="https://cdn-icons-png.flaticon.com/512/174/174872.png" alt="Spotify">
+                        <span>Spotify</span>
+                    </a>
+                </div>
 
-            <!-- Apple Music (Twoja grafika lokalna) -->
-            <div class="icon-slot">
-                <a href="#" class="icon-content">
-                    <img src="applemusic.png" alt="Apple Music">
-                    <span>Apple Music</span>
-                </a>
-            </div>
+                <!-- Apple Music -->
+                <div class="icon-slot">
+                    <a href="#" class="icon-content">
+                        <img src="applemusic.png" alt="Apple Music">
+                        <span>Apple Music</span>
+                    </a>
+                </div>
 
-            <!-- TikTok -->
-            <div class="icon-slot">
-                <a href="#" class="icon-content">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok">
-                    <span>TikTok</span>
-                </a>
-            </div>
+                <!-- TikTok -->
+                <div class="icon-slot">
+                    <a href="#" class="icon-content">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok">
+                        <span>TikTok</span>
+                    </a>
+                </div>
 
-            <!-- Instagram -->
-            <div class="icon-slot">
-                <a href="#" class="icon-content">
-                    <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram">
-                    <span>Instagram</span>
-                </a>
-            </div>
+                <!-- Instagram -->
+                <div class="icon-slot">
+                    <a href="#" class="icon-content">
+                        <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram">
+                        <span>Instagram</span>
+                    </a>
+                </div>
 
-            <!-- Bandcamp (Twoja grafika lokalna) -->
-            <div class="icon-slot">
-                <a href="#" class="icon-content">
-                    <img src="bandcamp.png" alt="Bandcamp">
-                    <span>Bandcamp</span>
-                </a>
+                <!-- Bandcamp -->
+                <div class="icon-slot">
+                    <a href="#" class="icon-content">
+                        <img src="bandcamp.png" alt="Bandcamp">
+                        <span>Bandcamp</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         const scene = document.getElementById('scene');
+        const orbit = document.getElementById('orbit');
         const slots = document.querySelectorAll('.icon-slot');
         const count = slots.length;
         
         let isDragging = false;
         let startX;
         let currentRotation = 0;
-        let velocity = 0.15; // Prędkość początkowa
+        const autoSpinSpeed = 0.15; // Stała prędkość obrotu
 
-        function updateIcons() {
+        function update() {
             if (!isDragging) {
-                currentRotation += velocity;
+                currentRotation += autoSpinSpeed;
             }
 
             slots.forEach((slot, i) => {
                 const baseAngle = (i / count) * 360;
                 const finalAngle = baseAngle + currentRotation;
                 
-                // Obliczanie głębi dla przezroczystości i klikalności
+                // Pozycja Z dla logiki klikania (ikony z tyłu są nieklikalne)
                 const zPos = Math.cos(finalAngle * Math.PI / 180) * 280;
-                const opacity = (zPos + 280) / 560;
-
-                // Rotacja tylko slotu (ikony kręcą się razem z nim)
+                
+                // Obrót slotu wokół planety
                 slot.style.transform = `rotateY(${finalAngle}deg) translateZ(var(--radius))`;
                 
-                // Ustawienia widoczności
-                if (zPos < -10) {
-                    slot.style.opacity = opacity + 0.1;
+                // Widoczność ikon z tyłu
+                if (zPos < -20) {
+                    slot.style.opacity = "0.3";
                     slot.style.pointerEvents = "none";
                 } else {
-                    slot.style.opacity = 1;
+                    slot.style.opacity = "1";
                     slot.style.pointerEvents = "auto";
-                    slot.style.zIndex = 10;
                 }
             });
 
-            requestAnimationFrame(updateIcons);
+            requestAnimationFrame(update);
         }
 
-        // Mouse Events z "bezwładnością" (płynny ruch)
+        // Obsługa myszki
         function handleStart(e) {
             isDragging = true;
             startX = e.pageX || e.touches[0].pageX;
@@ -242,10 +248,9 @@
         function handleMove(e) {
             if (!isDragging) return;
             const x = e.pageX || e.touches[0].pageX;
-            const delta = (x - startX) * 0.2;
+            const delta = (x - startX) * 0.25; // Czułość przesuwania
             currentRotation += delta;
             startX = x;
-            velocity = delta; // Zapamiętaj prędkość ruchu myszki
         }
 
         scene.addEventListener('mousedown', handleStart);
@@ -255,7 +260,7 @@
         window.addEventListener('touchend', handleEnd);
         window.addEventListener('touchmove', handleMove);
 
-        updateIcons();
+        update();
     </script>
 </body>
 </html>
