@@ -1,0 +1,66 @@
+/* Podstawowe ustawienia tła - minimalizm */
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #0b0b0b; /* Bardzo ciemne tło */
+    overflow: hidden;
+    font-family: sans-serif;
+}
+
+/* Kontener dla całego efektu 3D */
+.universe {
+    perspective: 1000px; /* Daje efekt głębi 3D */
+}
+
+/* Nasza planeta */
+.planet {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    transform-style: preserve-3d;
+    animation: rotacja 20s linear infinite;
+    cursor: pointer;
+    transition: transform 0.5s ease;
+}
+
+/* Animacja obracania się planety */
+@keyframes rotacja {
+    from { transform: rotateY(0deg) rotateX(10deg); }
+    to { transform: rotateY(360deg) rotateX(10deg); }
+}
+
+/* Stylizacja ikon na planecie */
+.icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    margin-left: -25px;
+    margin-top: -25px;
+    
+    /* Rozmieszczenie ikon w przestrzeni 3D */
+    /* Każda ikona jest obrócona o inny kąt dzięki zmiennej --i */
+    transform: rotateY(calc(var(--i) * 72deg)) translateZ(150px);
+}
+
+.icon img {
+    width: 100%;
+    height: 100%;
+    filter: grayscale(100%) brightness(1.5); /* Minimalistyczny wygląd - czarno-białe ikony */
+    transition: 0.3s;
+}
+
+/* Efekt po najechaniu na planetę */
+.planet:hover {
+    animation-play-state: paused; /* Planeta zatrzymuje się po najechaniu myszką */
+}
+
+.icon:hover img {
+    filter: grayscale(0%); /* Kolor wraca po najechaniu na konkretną ikonę */
+    transform: scale(1.2);
+}
