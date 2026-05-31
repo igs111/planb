@@ -6,7 +6,7 @@
     <title>Planeta Artysty</title>
     <style>
         :root {
-            --radius: 250px; /* Jak daleko ikony są od środka */
+            --radius: 280px; /* Zwiększyłem promień, żeby ikony miały więcej miejsca */
         }
 
         body {
@@ -19,12 +19,12 @@
             color: white;
             font-family: 'Inter', sans-serif;
             overflow: hidden;
-            user-select: none; /* Zapobiega zaznaczaniu tekstu przy kręceniu */
+            user-select: none;
         }
 
-        /* Kontener 3D */
+        /* Scena 3D */
         .scene {
-            perspective: 1200px;
+            perspective: 1500px; /* Zwiększona głębia */
             width: 100vw;
             height: 100vh;
             display: flex;
@@ -37,82 +37,86 @@
             cursor: grabbing;
         }
 
-        /* Planeta (orbita) */
+        /* Kontener planety */
         .planet {
             position: relative;
             width: 0;
             height: 0;
             transform-style: preserve-3d;
-            transition: transform 0.1s ease-out; /* Płynność ruchu przy kręceniu */
+            will-change: transform;
         }
 
-        /* Środek planety - delikatna poświata */
-        .core {
+        /* Slot na ikonę - to on trzyma pozycję w kole */
+        .icon-slot {
             position: absolute;
+            transform-style: preserve-3d;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Sama ikona wewnątrz slotu */
+        .icon-content {
             width: 100px;
             height: 100px;
-            background: radial-gradient(circle, #ffffff33 0%, transparent 70%);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-        }
-
-        /* Styl ikony */
-        .icon {
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            margin-left: -40px;
-            margin-top: -40px;
-            transform-style: preserve-3d;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-decoration: none;
             color: white;
-            transition: filter 0.3s, transform 0.3s;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .icon img {
-            width: 100%;
-            height: 100%;
+        .icon-content img {
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            filter: grayscale(100%) opacity(0.7);
+            filter: grayscale(100%) opacity(0.6);
             transition: 0.4s;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
         }
 
-        .icon span {
-            margin-top: 10px;
-            font-size: 10px;
+        .icon-content span {
+            margin-top: 8px;
+            font-size: 11px;
             letter-spacing: 2px;
             text-transform: uppercase;
             opacity: 0;
             transition: 0.3s;
+            white-space: nowrap;
         }
-
-        /* Rozmieszczenie 5 ikon co 72 stopnie (360/5) */
-        .icon:nth-child(1) { transform: rotateY(0deg) translateZ(var(--radius)); }
-        .icon:nth-child(2) { transform: rotateY(72deg) translateZ(var(--radius)); }
-        .icon:nth-child(3) { transform: rotateY(144deg) translateZ(var(--radius)); }
-        .icon:nth-child(4) { transform: rotateY(216deg) translateZ(var(--radius)); }
-        .icon:nth-child(5) { transform: rotateY(288deg) translateZ(var(--radius)); }
 
         /* Hover efekty */
-        .icon:hover img {
+        .icon-content:hover img {
             filter: grayscale(0%) opacity(1);
             transform: scale(1.2);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
         }
 
-        .icon:hover span {
+        .icon-content:hover span {
             opacity: 1;
         }
 
+        /* Instrukcja na dole */
         .instruction {
             position: absolute;
             bottom: 30px;
-            font-size: 12px;
-            opacity: 0.4;
-            letter-spacing: 3px;
+            font-size: 11px;
+            opacity: 0.3;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Środek - poświata */
+        .core {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
         }
     </style>
 </head>
@@ -121,107 +125,120 @@
     <div class="scene" id="scene">
         <div class="core"></div>
         <div class="planet" id="planet">
+            <!-- Ikony zostaną wygenerowane/ustawione przez JS dla precyzji -->
             
-            <!-- Spotify -->
-            <a href="#" class="icon">
-                <img src="https://cdn-icons-png.flaticon.com/512/174/174872.png" alt="Spotify">
-                <span>Spotify</span>
-            </a>
+            <div class="icon-slot" data-index="0">
+                <a href="#" class="icon-content">
+                    <img src="https://cdn-icons-png.flaticon.com/512/174/174872.png" alt="Spotify">
+                    <span>Spotify</span>
+                </a>
+            </div>
 
-            <!-- Apple Music -->
-            <a href="#" class="icon">
-                <img src="https://cdn-icons-png.flaticon.com/512/3844/3844727.png" alt="Apple Music">
-                <span>Apple Music</span>
-            </a>
+            <div class="icon-slot" data-index="1">
+                <a href="#" class="icon-content">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3844/3844727.png" alt="Apple Music">
+                    <span>Apple Music</span>
+                </a>
+            </div>
 
-            <!-- TikTok -->
-            <a href="#" class="icon">
-                <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok">
-                <span>TikTok</span>
-            </a>
+            <div class="icon-slot" data-index="2">
+                <a href="#" class="icon-content">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok">
+                    <span>TikTok</span>
+                </a>
+            </div>
 
-            <!-- Instagram -->
-            <a href="#" class="icon">
-                <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram">
-                <span>Instagram</span>
-            </a>
+            <div class="icon-slot" data-index="3">
+                <a href="#" class="icon-content">
+                    <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram">
+                    <span>Instagram</span>
+                </a>
+            </div>
 
-            <!-- Bandcamp -->
-            <a href="#" class="icon">
-                <img src="https://cdn-icons-png.flaticon.com/512/2504/2504743.png" alt="Bandcamp">
-                <span>Bandcamp</span>
-            </a>
+            <div class="icon-slot" data-index="4">
+                <a href="#" class="icon-content">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2504/2504743.png" alt="Bandcamp">
+                    <span>Bandcamp</span>
+                </a>
+            </div>
 
         </div>
     </div>
 
-    <div class="instruction">PRZECIĄGNIJ, ABY OBRÓCIĆ</div>
+    <div class="instruction">Chwyć i przesuń, aby obrócić</div>
 
     <script>
         const planet = document.getElementById('planet');
         const scene = document.getElementById('scene');
+        const slots = document.querySelectorAll('.icon-slot');
+        const count = slots.length;
         
         let isDragging = false;
         let startX;
         let currentRotation = 0;
-        let autoSpin = 0.2; // Prędkość automatycznego obracania
+        let autoSpin = 0.15; 
 
-        // Funkcja obracania
-        function updateRotation() {
+        // 1. Rozmieść ikony na starcie w okręgu
+        function setupIcons() {
+            slots.forEach((slot, i) => {
+                const angle = (i / count) * 360;
+                slot.dataset.angle = angle; // Zapisujemy kąt bazowy
+                updateIconPosition(slot, angle, currentRotation);
+            });
+        }
+
+        // 2. Funkcja aktualizująca pozycję konkretnej ikony
+        function updateIconPosition(slot, baseAngle, rotation) {
+            const finalAngle = baseAngle + rotation;
+            // Slot wędruje po orbicie, a Icon-Content obraca się o -finalAngle, żeby zawsze patrzeć na nas
+            slot.style.transform = `rotateY(${finalAngle}deg) translateZ(var(--radius))`;
+            const content = slot.querySelector('.icon-content');
+            content.style.transform = `rotateY(${-finalAngle}deg)`;
+        }
+
+        // 3. Główna pętla animacji
+        function animate() {
             if (!isDragging) {
                 currentRotation += autoSpin;
             }
-            planet.style.transform = `rotateY(${currentRotation}deg)`;
-            
-            // Sprawiamy, by ikony zawsze patrzyły na widza
-            const icons = document.querySelectorAll('.icon');
-            icons.forEach(icon => {
-                icon.style.transform = icon.style.transform.split('rotateY')[0] + `rotateY(${-currentRotation}deg) translateZ(var(--radius))`;
+
+            slots.forEach((slot) => {
+                const baseAngle = parseFloat(slot.dataset.angle);
+                updateIconPosition(slot, baseAngle, currentRotation);
             });
 
-            requestAnimationFrame(updateRotation);
+            requestAnimationFrame(animate);
         }
 
-        // Obsługa myszki
-        scene.addEventListener('mousedown', (e) => {
+        // 4. Obsługa myszy i dotyku
+        function handleStart(e) {
             isDragging = true;
-            startX = e.pageX;
-            autoSpin = 0; // Zatrzymaj auto-spin przy dotknięciu
-        });
+            startX = e.pageX || e.touches[0].pageX;
+        }
 
-        window.addEventListener('mouseup', () => {
+        function handleEnd() {
             isDragging = false;
-            autoSpin = 0.1; // Powolny powrót do auto-spinu
-        });
+        }
 
-        window.addEventListener('mousemove', (e) => {
+        function handleMove(e) {
             if (!isDragging) return;
-            const x = e.pageX;
-            const walk = (x - startX) * 0.2; // Czułość obracania
-            currentRotation += walk;
+            const x = e.pageX || e.touches[0].pageX;
+            const delta = (x - startX) * 0.3; // Czułość
+            currentRotation += delta;
             startX = x;
-        });
+        }
 
-        // Obsługa dotyku (telefony)
-        scene.addEventListener('touchstart', (e) => {
-            isDragging = true;
-            startX = e.touches[0].pageX;
-        });
+        scene.addEventListener('mousedown', handleStart);
+        window.addEventListener('mouseup', handleEnd);
+        window.addEventListener('mousemove', handleMove);
 
-        window.addEventListener('touchend', () => {
-            isDragging = false;
-        });
+        scene.addEventListener('touchstart', handleStart);
+        window.addEventListener('touchend', handleEnd);
+        window.addEventListener('touchmove', handleMove);
 
-        window.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            const x = e.touches[0].pageX;
-            const walk = (x - startX) * 0.2;
-            currentRotation += walk;
-            startX = x;
-        });
-
-        // Uruchom animację
-        updateRotation();
+        // Start
+        setupIcons();
+        animate();
     </script>
 </body>
 </html>
